@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}企业招聘管理系统{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- 左侧导航栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🏢 招聘系统</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                {% if session.get('role') == 'admin' %}
+                <!-- 管理员导航 -->
+                <div class="nav-section">
+                    <div class="nav-section-title">管理功能</div>
+                    <a href="#dashboard" class="nav-item nav-link" data-section="dashboard" title="数据概览">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">数据概览</span>
+                    </a>
+                    <a href="#job-list" class="nav-item nav-link" data-section="job-list" title="职位管理">
+                        <span class="nav-icon">💼</span>
+                        <span class="nav-text">职位管理</span>
+                    </a>
+                    <a href="#applications" class="nav-item nav-link" data-section="applications" title="申请管理">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">申请管理</span>
+                    </a>
+                </div>
+                {% else %}
+                <!-- 普通用户导航（包括未登录） -->
+                <div class="nav-section">
+                    <div class="nav-section-title">求职功能</div>
+                    <a href="#jobs" class="nav-item nav-link" data-section="jobs" title="职位列表">
+                        <span class="nav-icon">💼</span>
+                        <span class="nav-text">职位列表</span>
+                    </a>
+                    {% if session.get('username') %}
+                    <a href="#my-applications" class="nav-item nav-link" data-section="my-applications" title="我的申请">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">我的申请</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="nav-section">
+                    <div class="nav-section-title">其他</div>
+                    <a href="{{ url_for('about') }}" class="nav-item" title="关于我们">
+                        <span class="nav-icon">ℹ️</span>
+                        <span class="nav-text">关于我们</span>
+                    </a>
+                    <a href="{{ url_for('help') }}" class="nav-item" title="帮助中心">
+                        <span class="nav-icon">❓</span>
+                        <span class="nav-text">帮助中心</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                {% if session.get('username') %}
+                <div class="user-info">
+                    <div class="user-avatar">{{ session.name[0] }}</div>
+                    <div class="user-details">
+                        <div class="user-name">{{ session.name }}</div>
+                        <div class="user-role-badge">{{ '管理员' if session.role == 'admin' else '求职者' }}</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn-logout" title="退出登录">
+                    <span>🚪</span>
+                    <span>退出登录</span>
+                </a>
+                {% else %}
+                <div class="login-prompt-sidebar">
+                    <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 1rem;">登录后查看申请状态</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">登录</a>
+                    <a href="{{ url_for('register') }}" class="btn" style="width: 100%; background: rgba(255,255,255,0.1); color: white;">注册</a>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content" id="mainContent">
+            <!-- 汉堡菜单按钮 -->
+            <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="content-wrapper">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+    // 侧边栏切换功能
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('sidebarToggle');
+
+        sidebar.classList.toggle('expanded');
+        mainContent.classList.toggle('contracted');
+        toggleBtn.classList.toggle('active');
+
+        // 保存状态到 localStorage
+        const isExpanded = sidebar.classList.contains('expanded');
+        localStorage.setItem('sidebarExpanded', isExpanded);
+    }
+
+    // 页面加载时恢复侧边栏状态
+    window.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('sidebarToggle');
+
+        if (sidebar && mainContent) {
+            const isExpanded = localStorage.getItem('sidebarExpanded') === 'true';
+
+            if (isExpanded) {
+                sidebar.classList.add('expanded');
+                mainContent.classList.add('contracted');
+                toggleBtn.classList.add('active');
+            }
+        }
+
+        // 初始化滚动监听
+        initScrollSpy();
+    });
+
+    // 滚动监听功能 - 根据当前位置高亮导航
+    function initScrollSpy() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = [];
+
+        // 收集所有section元素
+        navLinks.forEach(link => {
+            const sectionId = link.getAttribute('data-section');
+            const section = document.getElementById(sectionId);
+            if (section) {
+                sections.push({
+                    id: sectionId,
+                    element: section,
+                    link: link
+                });
+            }
+        });
+
+        if (sections.length === 0) return;
+
+        // 滚动事件处理
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    updateActiveNav();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // 点击导航平滑滚动
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('data-section');
+                const section = document.getElementById(sectionId);
+
+                if (section) {
+                    // 移除所有active状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // 添加当前active状态
+                    this.classList.add('active');
+
+                    // 平滑滚动到对应位置
+                    const offsetTop = section.offsetTop - 100;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 更新导航激活状态
+        function updateActiveNav() {
+            const scrollPosition = window.scrollY + 150;
+
+            let currentSection = null;
+
+            // 找到当前可见的section
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const section = sections[i];
+                if (section.element.offsetTop <= scrollPosition) {
+                    currentSection = section;
+                    break;
+                }
+            }
+
+            // 如果没有找到，使用第一个section
+            if (!currentSection && sections.length > 0) {
+                currentSection = sections[0];
+            }
+
+            // 更新active状态
+            if (currentSection) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                currentSection.link.classList.add('active');
+            }
+        }
+
+        // 初始调用一次
+        updateActiveNav();
+    }
+    </script>
+</body>
+</html>

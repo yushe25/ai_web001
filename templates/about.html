@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}个人简介 - 简历分析系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">👨‍💻 个人简介</h1>
+
+    <!-- 个人信息卡片 -->
+    <div class="card">
+        <div style="text-align: center; padding: 2rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎓</div>
+            <h2 style="color: #1e293b; font-size: 2rem; margin-bottom: 0.5rem;">dgw</h2>
+            <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 1rem;">人工智能技术应用 | 大二学生</p>
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">📧 ddd@163.com</span>
+                <span style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">📱 195-0000-0000</span>
+                <span style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">🐙 github.com/</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于我 -->
+    <div class="card">
+        <h2 class="section-title">🌟 关于我</h2>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #475569;">
+            你好！我是一名热爱编程的计算机专业大二学生。对 Web 开发、人工智能和数据分析充满热情，
+            喜欢通过代码解决实际问题。在校期间积极参与各类项目开发，不断学习和探索新技术。
+        </p>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #475569; margin-top: 1rem;">
+            这个简历分析系统是我在学习 Flask 框架和 AI 技术应用过程中的实践项目，
+            旨在通过智能化手段提升招聘效率，帮助企业和求职者实现更好的匹配。
+        </p>
+    </div>
+
+    <!-- 技能栈 -->
+    <div class="card">
+        <h2 class="section-title">💻 技术技能</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🐍</div>
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">Python 开发</h3>
+                <p style="color: #64748b; font-size: 0.95rem;">
+                    熟练掌握 Python 编程，熟悉 Flask/Django 框架，具备后端 API 开发经验
+                </p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🤖</div>
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">AI & 机器学习</h3>
+                <p style="color: #64748b; font-size: 0.95rem;">
+                    了解自然语言处理基础，熟悉 OpenAI API 集成，能够应用 AI 技术解决实际问题
+                </p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🗄️</div>
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">数据库管理</h3>
+                <p style="color: #64748b; font-size: 0.95rem;">
+                    掌握 MySQL 数据库设计与优化，熟悉 SQLAlchemy ORM 框架
+                </p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎨</div>
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">前端开发</h3>
+                <p style="color: #64748b; font-size: 0.95rem;">
+                    熟悉 HTML/CSS/JavaScript，了解响应式设计，能够构建用户友好的界面
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 教育背景 -->
+    <div class="card">
+        <h2 class="section-title">🎓 教育背景</h2>
+        <div style="display: grid; gap: 1.5rem;">
+            <div style="padding: 1.5rem; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 10px; border-left: 4px solid #667eea;">
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">XX大学</h3>
+                <p style="color: #475569; font-weight: 500;">人工智能技术应用 | 专科</p>
+                <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">2024.09 - 2027.06（预计毕业）</p>
+                <p style="color: #64748b; margin-top: 0.5rem; line-height: 1.6;">
+                    主修课程：web开发、算法设计、操作系统、计算机网络、数据库、人工智能基础
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 项目经历 -->
+    <div class="card">
+        <h2 class="section-title">🚀 项目经历</h2>
+        <div style="display: grid; gap: 1.5rem;">
+            <div style="padding: 1.5rem; background: linear-gradient(135deg, #fff5f5, #fed7d7); border-radius: 10px; border-left: 4px solid #f56565;">
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">📄 AI 简历分析系统</h3>
+                <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.5rem;">
+                    <strong>技术栈：</strong>Flask + SQLAlchemy + OpenAI API + PyPDF2
+                </p>
+                <p style="color: #64748b; line-height: 1.6;">
+                    开发基于 AI 的智能简历分析系统，实现简历自动解析、技能提取和职位匹配功能。
+                    支持 PDF/DOCX 格式文件上传，利用 NLP 技术进行智能分析。
+                </p>
+            </div>
+            <div style="padding: 1.5rem; background: linear-gradient(135deg, #f0fff4, #c6f6d5); border-radius: 10px; border-left: 4px solid #48bb78;">
+                <h3 style="color: #1e293b; margin-bottom: 0.5rem;">🤖 模型部署</h3>
+                <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.5rem;">
+                    <strong>技术栈：</strong>ollama + ragflaow
+                </p>
+                <p style="color: #64748b; line-height: 1.6;">
+                    本地部署deep seek大模型。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 兴趣爱好 -->
+    <div class="card">
+        <h2 class="section-title">🎯 兴趣爱好</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+            <span style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 1rem;">🎮 编程</span>
+            <span style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 1rem;">📷 摄影</span>
+            <span style="background: linear-gradient(135deg, #fa709a, #fee140); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 1rem;">🎵 音乐</span>
+        </div>
+    </div>
+
+    <!-- 职业目标 -->
+    <div class="card">
+        <h2 class="section-title">🎯 职业目标</h2>
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #475569; text-align: center;">
+            希望在毕业后成为一名优秀的<strong>软件设计师</strong>或<strong>AI 应用开发工程师</strong>，<br>
+            在技术创新的道路上不断前行，用代码创造更多价值！✨
+        </p>
+    </div>
+</div>
+{% endblock %}

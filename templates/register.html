@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}注册 - 企业招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card" style="max-width: 400px; width: 100%;">
+        <h2 class="card-title text-center">用户注册</h2>
+        <form method="POST" id="registerForm">
+            <div class="form-group">
+                <label class="form-label">用户名 *</label>
+                <input type="text" name="username" required class="form-control"
+                       id="username" minlength="3" maxlength="20"
+                       placeholder="请输入用户名（3-20个字符）">
+                <div class="invalid-feedback" id="usernameError">用户名长度为3-20个字符</div>
+                <div class="valid-feedback" id="usernameSuccess">✓ 用户名可用</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">姓名 *</label>
+                <input type="text" name="name" required class="form-control"
+                       id="name" placeholder="请输入真实姓名">
+            </div>
+            <div class="form-group">
+                <label class="form-label">密码 *</label>
+                <input type="password" name="password" required class="form-control"
+                       id="password" minlength="6"
+                       placeholder="请输入密码（至少6位）">
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                </div>
+                <div class="invalid-feedback" id="passwordError">密码长度至少6位</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">确认密码 *</label>
+                <input type="password" required class="form-control"
+                       id="confirmPassword" placeholder="请再次输入密码">
+                <div class="invalid-feedback" id="confirmPasswordError">两次输入的密码不一致</div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">注册</button>
+        </form>
+        <p class="text-center mt-1">
+            已有账号？<a href="{{ url_for('login') }}" class="link-primary">立即登录</a>
+        </p>
+    </div>
+</div>
+
+<script>
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    const strengthBar = document.getElementById('passwordStrengthBar');
+
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.length >= 10) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+    strengthBar.className = 'password-strength-bar';
+    if (strength <= 2) {
+        strengthBar.classList.add('password-strength-weak');
+    } else if (strength <= 4) {
+        strengthBar.classList.add('password-strength-medium');
+    } else {
+        strengthBar.classList.add('password-strength-strong');
+    }
+});
+
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    let isValid = true;
+
+    // 验证密码一致性
+    if (password !== confirmPassword) {
+        document.getElementById('confirmPassword').classList.add('is-invalid');
+        document.getElementById('confirmPasswordError').classList.add('show');
+        isValid = false;
+    } else {
+        document.getElementById('confirmPassword').classList.remove('is-invalid');
+        document.getElementById('confirmPasswordError').classList.remove('show');
+    }
+
+    if (!isValid) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

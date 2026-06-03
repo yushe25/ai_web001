@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 企业招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card" style="max-width: 400px; width: 100%;">
+        <h2 class="card-title text-center">用户登录</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">用户名</label>
+                <input type="text" name="username" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <input type="password" name="password" required class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">登录</button>
+        </form>
+        <p class="text-center mt-1">
+            还没有账号？<a href="{{ url_for('register') }}" class="link-primary">立即注册</a>
+        </p>
+        <div class="info-box">
+            <strong>测试账号：</strong><br>
+            管理员：admin / admin123<br>
+            用户：user1 / user123
+        </div>
+    </div>
+</div>
+{% endblock %}

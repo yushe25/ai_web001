@@ -1,0 +1,52 @@
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+__pycache__/
+*.pyc
+*.pyo
+.cache/
+
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Flask
+instance/
+.webassets-cache
+flask_session/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment Variables
+.env
+.env.local
+config.py
+secret_key.py
+
+# Logs
+*.log
+logs/
+
+# Uploads (保留目录结构但不上传实际文件)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Coverage and Testing
+htmlcov/
+.tox/
+.coverage
+.pytest_cache/

@@ -1,0 +1,872 @@
+{% extends "base.html" %}
+
+{% block title %}管理后台 - 企业招聘管理系统{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #64748b;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.close-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    transform: rotate(90deg);
+}
+
+.fab-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fab-button:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.add-job-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.add-job-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* AI 分析按钮样式 */
+.ai-analyze-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.ai-analyze-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.ai-analyze-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* AI 分析结果模态框样式 */
+.ai-result-modal .modal-content {
+    max-width: 900px;
+}
+
+.ai-score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #667eea var(--score-deg), #e2e8f0 var(--score-deg));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    position: relative;
+}
+
+.ai-score-circle::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: white;
+}
+
+.ai-score-value {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.ai-score-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #667eea;
+    line-height: 1;
+}
+
+.ai-score-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.3rem;
+}
+
+.ai-result-section {
+    margin-bottom: 1.5rem;
+    padding: 1.2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.ai-result-section h4 {
+    margin: 0 0 0.8rem 0;
+    color: #1e293b;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.skill-tag.matched {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.skill-tag.missing {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.ai-summary {
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    line-height: 1.6;
+    color: #475569;
+}
+
+.ai-recommendation {
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.ai-recommendation.high {
+    background: #d1fae5;
+    color: #065f46;
+    border: 2px solid #10b981;
+}
+
+.ai-recommendation.medium {
+    background: #fef3c7;
+    color: #92400e;
+    border: 2px solid #f59e0b;
+}
+
+.ai-recommendation.low {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 2px solid #ef4444;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.no-resume {
+    color: #94a3b8;
+    font-style: italic;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 统计卡片 -->
+<div id="dashboard" class="stats-grid fade-in">
+    <div class="stat-card">
+        <div class="stat-icon">💼</div>
+        <div class="stat-value">{{ total_jobs }}</div>
+        <div class="stat-label">在招职位总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value">{{ total_applications }}</div>
+        <div class="stat-label">收到申请总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ job_application_count | length }}</div>
+        <div class="stat-label">有申请的职位数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">{{ "%.1f" | format(total_applications / total_jobs * 100) if total_jobs > 0 else 0 }}%</div>
+        <div class="stat-label">平均每个职位申请数</div>
+    </div>
+</div>
+
+<!-- 图表区域 -->
+<div class="grid-2 fade-in">
+    <!-- 职位申请热度排行 -->
+    <div class="chart-container">
+        <h3 class="chart-title">🔥 职位申请热度排行</h3>
+        <div class="chart-wrapper">
+            <canvas id="jobPopularityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 部门分布 -->
+    <div class="chart-container">
+        <h3 class="chart-title">🏢 部门职位分布</h3>
+        <div class="chart-wrapper">
+            <canvas id="departmentChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- 申请趋势和详细列表 -->
+<div class="grid-2 fade-in">
+    <!-- 申请状态统计 -->
+    <div class="chart-container">
+        <h3 class="chart-title">✅ 申请状态统计</h3>
+        <div class="chart-wrapper">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 各部门申请情况 -->
+    <div class="chart-container">
+        <h3 class="chart-title">📈 各部门申请情况</h3>
+        {% for dept, stats in department_stats.items() %}
+        <div class="department-item">
+            <div class="department-name">{{ dept }}</div>
+            <div class="department-count">职位数: {{ stats.total }} | 申请数: {{ stats.applications }}</div>
+            <div class="progress-bar-custom">
+                <div class="progress-fill" style="width: {{ (stats.applications / total_applications * 100) if total_applications > 0 else 0 }}%">
+                    {{ "%.1f" | format(stats.applications / total_applications * 100) if total_applications > 0 else 0 }}%
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 当前职位列表 -->
+<div class="section-header" id="job-list" style="margin-top: 2rem;">
+    <h2 class="section-title" style="margin: 0;">当前职位列表</h2>
+    <button class="add-job-btn" onclick="openModal()" title="发布新职位">+</button>
+</div>
+<div class="card fade-in">
+    {% for job in jobs %}
+    <div class="list-item">
+        <div class="flex flex-between">
+            <div class="flex-1">
+                <h4 class="mb-1">{{ job.title }}</h4>
+                <p class="text-muted mb-1">
+                    {{ job.department }} | {{ job.salary }} | {{ job.location if job.location else '未设置' }}
+                </p>
+                <p class="text-muted" style="font-size: 0.85rem;">
+                    申请数: {{ job_application_count.get(job.title, 0) }}
+                </p>
+            </div>
+            <span class="badge badge-success">{{ job_application_count.get(job.title, 0) }} 人申请</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 所有申请记录 -->
+{% if applications %}
+<h2 class="page-title" style="margin: 2rem 0;" id="applications">所有申请记录</h2>
+<div class="card fade-in">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>申请人</th>
+                <th>职位名称</th>
+                <th>申请时间</th>
+                <th>简历</th>
+                <th>状态</th>
+                <th>AI 筛选</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr data-app-id="{{ app.id }}"
+                data-job-title="{{ app.job_posting.title }}"
+                data-job-description="{{ app.job_posting.description }}"
+                data-job-requirements="{{ app.job_posting.requirements }}"
+                data-resume-path="{{ app.resume_path or '' }}">
+                <td>{{ app.applicant.name }}</td>
+                <td>{{ app.job_posting.title }}</td>
+                <td>{{ app.applied_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if app.resume_path %}
+                        <a href="{{ url_for('static', filename=app.resume_path) }}" target="_blank" class="link-primary">
+                            📄 下载/预览
+                        </a>
+                    {% else %}
+                        <span class="text-muted no-resume">未上传</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if app.status == '已通过' %}
+                        <span class="badge badge-success">{{ app.status }}</span>
+                    {% elif app.status == '已拒绝' %}
+                        <span class="badge badge-danger">{{ app.status }}</span>
+                    {% elif app.status == '待审核' %}
+                        <span class="badge badge-warning">{{ app.status }}</span>
+                    {% else %}
+                        <span class="badge badge-info">{{ app.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if app.resume_path %}
+                    <button class="ai-analyze-btn" onclick="analyzeResume({{ app.id }})">
+                        <span>AI 初筛</span>
+                    </button>
+                    {% else %}
+                    <span class="text-muted no-resume">无简历</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('approve_application', application_id=app.id) }}" style="display: inline;">
+                        {% if app.status != '已通过' %}
+                        <button type="submit" name="action" value="approve" class="btn btn-success" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;" onclick="return confirm('确认通过该申请吗？')">
+                            ✓ 通过
+                        </button>
+                        {% endif %}
+                        {% if app.status != '已拒绝' %}
+                        <button type="submit" name="action" value="reject" class="btn btn-danger" style="padding: 0.3rem 0.8rem; font-size: 0.9rem; margin-left: 0.5rem;" onclick="return confirm('确认拒绝该申请吗？')">
+                            ✗ 拒绝
+                        </button>
+                        {% endif %}
+                        {% if app.status != '待审核' and app.status != '已申请' %}
+                        <button type="submit" name="action" value="pending" class="btn btn-warning" style="padding: 0.3rem 0.8rem; font-size: 0.9rem; margin-left: 0.5rem;">
+                            ↺ 重置
+                        </button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- 发布职位模态框 -->
+<div id="publishJobModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">➕ 发布新职位</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('publish_job') }}" id="publishJobForm">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">职位名称 *</label>
+                    <input type="text" name="title" required class="form-control" placeholder="例如：Python开发工程师">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">部门 *</label>
+                    <input type="text" name="department" required class="form-control" placeholder="例如：技术部">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">薪资范围 *</label>
+                    <input type="text" name="salary" required class="form-control" placeholder="例如：15-25K">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">工作地点</label>
+                    <input type="text" name="location" class="form-control" placeholder="例如：北京">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">职位描述 *</label>
+                <textarea name="description" rows="3" required class="form-control" placeholder="请详细描述工作职责..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">任职要求 *</label>
+                <textarea name="requirements" rows="3" required class="form-control" placeholder="请描述任职资格要求..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">发布职位</button>
+        </form>
+    </div>
+</div>
+
+<!-- AI 分析结果模态框 -->
+<div id="aiResultModal" class="modal ai-result-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">🤖 AI 简历分析报告</h3>
+            <button class="close-btn" onclick="closeAiModal()">&times;</button>
+        </div>
+        <div id="aiResultContent">
+            <!-- AI 分析结果将在这里动态显示 -->
+        </div>
+    </div>
+</div>
+
+<script>
+// 模态框控制函数
+function openModal() {
+    const modal = document.getElementById('publishJobModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // 防止背景滚动
+}
+
+function closeModal() {
+    const modal = document.getElementById('publishJobModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // 恢复滚动
+}
+
+// 点击模态框外部关闭
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('publishJobModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+});
+
+// ESC键关闭模态框
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// AI 简历分析功能
+function analyzeResume(appId) {
+    const row = document.querySelector(`tr[data-app-id="${appId}"]`);
+    if (!row) return;
+
+    const jobDescription = row.dataset.jobDescription;
+    const jobRequirements = row.dataset.jobRequirements;
+    const resumePath = row.dataset.resumePath;
+
+    if (!resumePath) {
+        alert('该申请人未上传简历！');
+        return;
+    }
+
+    // 显示加载状态
+    const btn = row.querySelector('.ai-analyze-btn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span><span>分析中...</span>';
+
+    // 打开结果模态框并显示加载状态
+    const modal = document.getElementById('aiResultModal');
+    const content = document.getElementById('aiResultContent');
+    content.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+            <div class="loading-spinner" style="width: 50px; height: 50px; border-width: 5px;"></div>
+            <p style="margin-top: 1rem; color: #64748b;">正在分析简历，请稍候...</p>
+        </div>
+    `;
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    // 发送 AJAX 请求
+    fetch('/ai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            job_description: jobDescription + '\n\n任职要求：' + jobRequirements,
+            resume_file_path: resumePath
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error || data.message);
+        }
+
+        // 显示分析结果
+        displayAiResult(data);
+
+        // 恢复按钮状态
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    })
+    .catch(error => {
+        console.error('AI 分析失败:', error);
+        content.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc2626;">
+                <p style="font-size: 3rem; margin-bottom: 1rem;">❌</p>
+                <h3 style="color: #dc2626; margin-bottom: 0.5rem;">分析失败</h3>
+                <p>${error.message}</p>
+                <button onclick="closeAiModal()" class="btn btn-primary" style="margin-top: 1rem;">关闭</button>
+            </div>
+        `;
+
+        // 恢复按钮状态
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+// 显示 AI 分析结果
+function displayAiResult(result) {
+    const content = document.getElementById('aiResultContent');
+
+    // 计算分数对应的角度
+    const scoreDeg = (result.match_score / 100) * 360;
+
+    // 判断推荐程度
+    let recommendationClass = 'low';
+    let recommendationText = '❌ 不推荐';
+    if (result.match_score >= 80) {
+        recommendationClass = 'high';
+        recommendationText = '✅ 强烈推荐';
+    } else if (result.match_score >= 60) {
+        recommendationClass = 'medium';
+        recommendationText = '⚠️ 可以考虑';
+    }
+
+    // 生成技能标签 HTML
+    const matchedSkillsHtml = result.matched_skills && result.matched_skills.length > 0
+        ? result.matched_skills.map(skill => `<span class="skill-tag matched">${skill}</span>`).join('')
+        : '<p class="text-muted">暂无匹配技能</p>';
+
+    const missingSkillsHtml = result.missing_skills && result.missing_skills.length > 0
+        ? result.missing_skills.map(skill => `<span class="skill-tag missing">${skill}</span>`).join('')
+        : '<p class="text-muted">无明显缺失技能</p>';
+
+    content.innerHTML = `
+        <div class="ai-score-circle" style="--score-deg: ${scoreDeg}deg;">
+            <div class="ai-score-value">
+                <div class="ai-score-number">${result.match_score}</div>
+                <div class="ai-score-label">匹配度</div>
+            </div>
+        </div>
+
+        <div class="ai-recommendation ${recommendationClass}">
+            ${recommendationText}
+        </div>
+
+        <div class="ai-result-section">
+            <h4>✅ 匹配技能</h4>
+            <div class="skill-tags">
+                ${matchedSkillsHtml}
+            </div>
+        </div>
+
+        <div class="ai-result-section">
+            <h4>⚠️ 缺失技能</h4>
+            <div class="skill-tags">
+                ${missingSkillsHtml}
+            </div>
+        </div>
+
+        <div class="ai-result-section">
+            <h4>📝 AI 评价</h4>
+            <div class="ai-summary">
+                ${result.summary || '暂无评价'}
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+            <p class="text-muted" style="font-size: 0.85rem; margin: 0;">
+                分析时间: ${new Date(result.analyzed_at).toLocaleString('zh-CN')} |
+                使用后端: ${result.backend_used || 'qwen'}
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <button onclick="closeAiModal()" class="btn btn-primary">关闭</button>
+        </div>
+    `;
+}
+
+// 关闭 AI 结果模态框
+function closeAiModal() {
+    const modal = document.getElementById('aiResultModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// 点击 AI 模态框外部关闭
+window.addEventListener('click', function(event) {
+    const aiModal = document.getElementById('aiResultModal');
+    if (event.target === aiModal) {
+        closeAiModal();
+    }
+});
+
+// 职位申请热度图表
+const jobLabels = {{ job_application_count.keys() | list | tojson }};
+const jobData = {{ job_application_count.values() | list | tojson }};
+
+if (jobLabels.length > 0) {
+    new Chart(document.getElementById('jobPopularityChart'), {
+        type: 'bar',
+        data: {
+            labels: jobLabels,
+            datasets: [{
+                label: '申请人数',
+                data: jobData,
+                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                borderColor: 'rgba(102, 126, 234, 1)',
+                borderWidth: 2,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+} else {
+    document.getElementById('jobPopularityChart').parentElement.innerHTML = '<p class="text-center text-muted">暂无数据</p>';
+}
+
+// 部门分布饼图
+const deptStats = {{ department_stats | tojson }};
+const deptLabels = Object.keys(deptStats);
+const deptData = deptLabels.map(dept => deptStats[dept].total);
+
+if (deptLabels.length > 0) {
+    new Chart(document.getElementById('departmentChart'), {
+        type: 'doughnut',
+        data: {
+            labels: deptLabels,
+            datasets: [{
+                data: deptData,
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(118, 75, 162, 0.8)',
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+} else {
+    document.getElementById('departmentChart').parentElement.innerHTML = '<p class="text-center text-muted">暂无数据</p>';
+}
+
+// 申请状态统计
+const statusStats = {{ status_stats | tojson }};
+const statusLabels = Object.keys(statusStats);
+const statusData = Object.values(statusStats);
+
+if (statusLabels.length > 0) {
+    new Chart(document.getElementById('statusChart'), {
+        type: 'pie',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: statusLabels.map(label => {
+                    if (label === '已通过') {
+                        return 'rgba(39, 174, 96, 0.8)';
+                    } else if (label === '待审核') {
+                        return 'rgba(243, 156, 18, 0.8)';
+                    } else if (label === '已拒绝') {
+                        return 'rgba(231, 76, 60, 0.8)';
+                    } else {
+                        return 'rgba(102, 126, 234, 0.8)';
+                    }
+                }),
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+} else {
+    document.getElementById('statusChart').parentElement.innerHTML = '<p class="text-center text-muted">暂无数据</p>';
+}
+
+// 表单验证
+document.getElementById('publishJobForm').addEventListener('submit', function(e) {
+    const inputs = this.querySelectorAll('[required]');
+    let isValid = true;
+
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+    });
+
+    if (!isValid) {
+        e.preventDefault();
+        alert('请填写所有必填字段');
+    }
+});
+</script>
+{% endblock %}
