@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}企业招聘管理系统{% endblock %}</title>
+    <title>{% block title %}智能招聘系统{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -20,7 +20,7 @@
                 <!-- 管理员导航 -->
                 <div class="nav-section">
                     <div class="nav-section-title">管理功能</div>
-                    <a href="#dashboard" class="nav-item nav-link" data-section="dashboard" title="数据概览">
+                    <a href="{{ url_for('dashboard') }}" class="nav-item" title="数据概览">
                         <span class="nav-icon">📊</span>
                         <span class="nav-text">数据概览</span>
                     </a>

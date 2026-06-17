@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 import os
 import logging
 from datetime import datetime
-from ai_select import analyze_resume
+from ai_select import ResumeAnalyzer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,14 +18,18 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # 配置MySQL数据库连接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:xxxx@localhost/recruitment_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost/web_test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')  #存储文件上传目录路径
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 最大上传16MB
+app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
+app.config['AI_BACKEND'] = 'local'
 
 db = SQLAlchemy(app)
+
+# 初始化简历分析器
+resume_analyzer = ResumeAnalyzer(backend_type=app.config['AI_BACKEND'])
 
 # 确保上传目录存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -404,14 +408,13 @@ def ai():
             }), 404
         
         # 调用 AI 分析函数
-        result = analyze_resume(job_description, resume_file_path)
+        result = resume_analyzer.analyze_resume(job_description, resume_file_path)
         
-        # 添加额外字段以符合规范
         result['analyzed_at'] = datetime.now().isoformat()
-        result['backend_used'] = 'qwen'
+        result['backend_used'] = app.config['AI_BACKEND']
         
         return jsonify(result), 200
-        
+
     except Exception as e:
         logger.error(f"API 调用失败: {str(e)}")
         return jsonify({
